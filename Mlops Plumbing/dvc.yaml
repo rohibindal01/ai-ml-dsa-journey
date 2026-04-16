@@ -1,0 +1,49 @@
+stages:
+  preprocess:
+    cmd: python -m src.data.preprocessing
+    deps:
+      - src/data/preprocessing.py
+      - data/raw
+    outs:
+      - data/processed/train.parquet
+      - data/processed/val.parquet
+      - data/processed/test.parquet
+    params:
+      - configs/default.yaml:
+          - data.target_column
+          - data.test_size
+          - data.val_size
+          - project.seed
+
+  train:
+    cmd: python -m src.models.trainer
+    deps:
+      - src/models/trainer.py
+      - src/features/engineering.py
+      - src/models/base.py
+      - data/processed/train.parquet
+      - data/processed/val.parquet
+      - configs/default.yaml
+    outs:
+      - checkpoints/
+    params:
+      - configs/default.yaml:
+          - model
+          - training
+          - preprocessing
+          - project.seed
+
+  evaluate:
+    cmd: python -m src.evaluation.metrics
+    deps:
+      - src/evaluation/metrics.py
+      - checkpoints/
+      - data/processed/test.parquet
+    metrics:
+      - metrics/eval_metrics.json:
+          cache: false
+    plots:
+      - metrics/confusion_matrix.html:
+          cache: false
+      - metrics/roc_curve.html:
+          cache: false

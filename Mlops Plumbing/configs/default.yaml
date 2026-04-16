@@ -1,0 +1,70 @@
+# @package _global_
+
+defaults:
+  - _self_
+
+project:
+  name: ml-project-template
+  seed: 42
+  experiment_name: default_experiment
+
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  test_size: 0.2
+  val_size: 0.1
+  target_column: target
+  feature_columns: []
+
+preprocessing:
+  imputer_strategy: mean
+  scaler: standard
+  encode_categoricals: true
+  max_categories: 20
+
+model:
+  type: random_forest
+  random_forest:
+    n_estimators: 200
+    max_depth: 10
+    min_samples_split: 5
+    min_samples_leaf: 2
+    n_jobs: -1
+  gradient_boosting:
+    n_estimators: 200
+    learning_rate: 0.05
+    max_depth: 5
+    subsample: 0.8
+  logistic_regression:
+    C: 1.0
+    max_iter: 1000
+    solver: lbfgs
+
+training:
+  epochs: 50
+  batch_size: 32
+  early_stopping_patience: 10
+  checkpoint_dir: checkpoints
+  log_every_n_steps: 10
+
+evaluation:
+  metrics:
+    - accuracy
+    - f1_macro
+    - roc_auc
+    - precision_macro
+    - recall_macro
+  plot_confusion_matrix: true
+  plot_roc_curve: true
+
+mlflow:
+  tracking_uri: http://localhost:5000
+  registry_uri: http://localhost:5000
+  model_name: ml-project-model
+
+serving:
+  host: 0.0.0.0
+  port: 8000
+  workers: 1
+  model_stage: Production
+  reload: false
